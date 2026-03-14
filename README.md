@@ -6,7 +6,9 @@
 
 This document presents our strategy for building an **AI-enabled parametric insurance platform** designed to protect India’s gig delivery workforce from income loss caused by external disruptions.
 
-Our solution focuses strictly on **loss of income protection**, excluding health, accident, or vehicle coverage as required by the challenge constraints. 
+Our solution focuses strictly on **loss of income protection**, excluding health, accident, or vehicle coverage as required by the challenge constraints.
+
+This platform strictly insures **loss of income due to external disruptions only**, and does **not cover health, accidents, medical expenses, or vehicle damage**.
 
 ---
 
@@ -30,13 +32,31 @@ External disruptions such as:
 
 can significantly reduce their working hours, often resulting in **20–30% income loss per month**.
 
-Traditional insurance models are not suited for this scenario because they require **manual claims and verification processes**.
+Traditional insurance models are not suited for this scenario because they require **manual claims and verification processes**, leading to delays and operational complexity.
 
 Our solution introduces **parametric insurance**, where payouts are triggered automatically when predefined environmental conditions occur.
 
 ---
 
-# 2. Solution: Parametric Income Protection
+# 2. Key Innovation
+
+Our platform introduces several innovations specifically designed for gig workers.
+
+### Hyper-Local Risk Pricing
+
+Insurance premiums are calculated using **zone-level environmental risk models**, allowing workers in safer zones to pay lower premiums.
+
+### Zero-Touch Parametric Claims
+
+Claims are automatically triggered when disruption conditions are detected, eliminating manual claims processing.
+
+### Real-Time Income Protection
+
+The payout amount is calculated dynamically based on the worker’s **average hourly earnings and disruption duration**, ensuring accurate compensation.
+
+---
+
+# 3. Solution: Parametric Income Protection
 
 Our platform uses a **parametric insurance model** where claims are triggered automatically based on measurable external conditions.
 
@@ -65,7 +85,7 @@ This approach provides:
 
 ---
 
-# 3. Delivery Persona
+# 4. Delivery Persona
 
 We selected **Food Delivery Riders** as the primary persona.
 
@@ -118,7 +138,35 @@ This ensures Ravi’s earnings are protected **without manual intervention**.
 
 ---
 
-# 4. Platform Choice: Web-First PWA
+# 5. Worker Workflow
+
+The platform provides a simple workflow for gig workers.
+
+```
+Worker registers on the platform
+↓
+AI models calculate risk and weekly premium
+↓
+Worker activates weekly insurance policy
+↓
+System monitors disruption signals
+↓
+Disruption detected in worker’s zone
+↓
+Automatic claim generated
+↓
+Fraud detection checks claim
+↓
+Instant payout processed
+↓
+Worker receives compensation
+```
+
+This workflow ensures workers receive **fast and reliable protection against income loss**.
+
+---
+
+# 6. Platform Choice: Web-First PWA
 
 The platform will be implemented as a **web-based Progressive Web App (PWA)**.
 
@@ -148,7 +196,7 @@ PWAs enable:
 
 ---
 
-# 5. Financial Model (Weekly Pricing)
+# 7. Financial Model (Weekly Pricing)
 
 Gig workers typically operate on **weekly earning cycles**, so insurance pricing must follow the same pattern.
 
@@ -157,7 +205,7 @@ Our platform therefore uses **weekly dynamic premiums**.
 ### Premium Formula
 
 ```
-Weekly_Premium = Base_Price + (Risk_Score × Multiplier)
+Weekly_Premium = Base_Price + (Zone_Risk × α) + (Worker_Risk × β)
 ```
 
 The **risk score** is calculated using AI models based on:
@@ -187,7 +235,7 @@ Payout = ₹360
 
 ---
 
-# 6. Parametric Disruption Triggers
+# 8. Parametric Disruption Triggers
 
 The system continuously monitors external signals.
 
@@ -202,9 +250,11 @@ When a threshold persists beyond a minimum duration, a **disruption event** is c
 
 ---
 
-# 7. System Architecture
+# 9. System Architecture
 
 Our platform follows a **modular event-driven architecture**.
+
+The backend is implemented as a modular monolith, allowing rapid development during the hackathon while enabling future migration to microservices.
 
 ```
                 Frontend
@@ -225,64 +275,132 @@ Our platform follows a **modular event-driven architecture**.
 
 ---
 
-### Backend Responsibilities
+# Detailed Architecture
 
-The backend acts as the **orchestration layer**.
-
-Responsibilities include:
-
-* worker authentication
-* policy management
-* disruption monitoring
-* claim automation
-* fraud detection coordination
-* payment processing
-
-The backend is implemented using:
+The platform consists of **five logical layers**.
 
 ```
-NestJS with Fastify adapter
+Client Layer
+API Layer
+Event Processing Layer
+AI/ML Layer
+Data Layer
 ```
 
-for improved performance and scalability.
+### Architecture Diagram
+
+```
+                ┌────────────────────────────┐
+                │        Client Layer        │
+                │  Worker Web App (PWA)      │
+                │  Admin Dashboard           │
+                │  React / Next.js           │
+                └─────────────┬──────────────┘
+                              │
+                              ▼
+                ┌────────────────────────────┐
+                │        API Layer           │
+                │   NestJS + Fastify         │
+                │                            │
+                │ Auth Service               │
+                │ Policy Service             │
+                │ Claim Service              │
+                │ Disruption Service         │
+                │ Payment Service            │
+                └─────────────┬──────────────┘
+                              │
+                              ▼
+                ┌────────────────────────────┐
+                │     Event Processing       │
+                │       Redis Streams        │
+                │                            │
+                │ DISRUPTION_DETECTED        │
+                │ CLAIM_CREATED              │
+                │ CLAIM_APPROVED             │
+                │ PAYMENT_PROCESSED          │
+                └─────────────┬──────────────┘
+                              │
+            ┌─────────────────┴─────────────────┐
+            ▼                                   ▼
+ ┌──────────────────────┐           ┌──────────────────────┐
+ │      AI / ML Layer   │           │       Data Layer     │
+ │   Python FastAPI     │           │      PostgreSQL      │
+ │                      │           │                      │
+ │ Zone Risk Model      │           │ users                │
+ │ Worker Risk Model    │           │ workers              │
+ │ Premium Model        │           │ policies             │
+ │ Fraud Detection      │           │ disruptions          │
+ │                      │           │ claims               │
+ └──────────────────────┘           │ payments             │
+                                    │ fraud_flags          │
+                                    └──────────────────────┘
+```
 
 ---
 
-# 8. Parametric Claim Automation
+# External Data Sources
 
-The system processes claims through an **event-driven pipeline**.
+The platform integrates several external systems to monitor disruptions and process payouts.
+
+```
+Weather API
+Traffic API
+Mock Delivery Platform API
+Payment Gateway
+```
+
+These signals feed into the **Disruption Detection Engine**, which generates events for the insurance pipeline.
+
+---
+
+# Parametric Event Pipeline
 
 ```
 Weather / Traffic APIs
-        ↓
+        │
+        ▼
 Disruption Detection Engine
-        ↓
+        │
+        ▼
 EVENT: DISRUPTION_DETECTED
-        ↓
+        │
+        ▼
 Claim Automation Engine
-        ↓
+        │
+        ▼
 EVENT: CLAIM_CREATED
-        ↓
+        │
+        ▼
 Fraud Detection
-        ↓
+        │
+        ▼
 EVENT: CLAIM_APPROVED
-        ↓
+        │
+        ▼
 Payment Service
-        ↓
+        │
+        ▼
 Worker receives payout
 ```
 
-This architecture enables **fully automated claims**.
+---
+
+# 10. AI / ML Integration
+
+Machine learning is used across multiple components.
 
 ---
 
-# 9. AI / ML Integration
+### Zone Risk Model
 
-Machine learning is used across several parts of the system.
+Predicts disruption likelihood for each geographic zone.
 
-### Risk Prediction
+Input features:
 
-Predicts disruption likelihood in specific zones using historical weather data.
+* historical rainfall patterns
+* temperature trends
+* historical AQI levels
+* traffic congestion data
 
 Output:
 
@@ -292,13 +410,13 @@ zone_risk_score
 
 ---
 
-### Worker Risk Scoring
+### Worker Risk Model
 
-Evaluates worker exposure based on:
+Estimates worker exposure based on:
 
-* operating zone
-* work patterns
-* historical claim data
+* operating zone risk
+* working hours
+* historical claim behavior
 
 Output:
 
@@ -310,24 +428,36 @@ worker_risk_score
 
 ### Dynamic Premium Pricing
 
-Combines worker and zone risk scores to determine weekly premiums.
+Combines:
+
+```
+zone_risk_score
+worker_risk_score
+coverage amount
+```
+
+to calculate the **weekly premium**.
 
 ---
 
 ### Fraud Detection
 
-Anomaly detection models identify suspicious behavior such as:
+Anomaly detection models identify suspicious activity such as:
 
 * GPS spoofing
 * duplicate accounts
 * abnormal claim frequency
 * payout manipulation attempts
+* location mismatch between device GPS and registered zone
+* abnormal payout-to-premium ratios
 
-Models such as **Isolation Forest** can be used for anomaly detection.
+Algorithms such as **Isolation Forest** can be used for anomaly detection.
+
+Models can be trained using historical weather datasets, pollution records, and traffic congestion data available through public datasets and APIs.
 
 ---
 
-# 10. Technical Stack
+# 11. Technical Stack
 
 | Layer       | Technology       |
 | ----------- | ---------------- |
@@ -346,11 +476,11 @@ External integrations include:
 
 ---
 
-# 11. Development Roadmap
+# 12. Development Roadmap
 
 The project will be implemented across the **6-week DEVTrails timeline**.
 
-### Phase 1 (Weeks 1-2)
+### Phase 1 (Weeks 1–2)
 
 Focus:
 
@@ -367,7 +497,7 @@ Deliverables:
 
 ---
 
-### Phase 2 (Weeks 3-4)
+### Phase 2 (Weeks 3–4)
 
 Focus:
 
@@ -379,7 +509,7 @@ Focus:
 
 ---
 
-### Phase 3 (Weeks 5-6)
+### Phase 3 (Weeks 5–6)
 
 Focus:
 
@@ -390,7 +520,31 @@ Focus:
 
 ---
 
-# 12. Startup Strategy (DEVTrails Economy)
+# 13. Demo Scenario
+
+The demo will simulate a real disruption event.
+
+```
+Worker registers and purchases weekly coverage
+↓
+Rainstorm simulated by injecting mock Weather API data exceeding the rainfall threshold.
+↓
+Disruption detection engine triggers event
+↓
+Automatic claim generated
+↓
+Fraud detection validates claim
+↓
+Payment service processes payout
+↓
+Worker dashboard updates with payout
+```
+
+This demonstrates the **complete parametric insurance workflow**.
+
+---
+
+# 14. Startup Strategy (DEVTrails Economy)
 
 Our startup begins with **DC 100,000 seed capital**.
 
@@ -409,8 +563,6 @@ Our strategy focuses on:
 * avoiding late submission penalties
 * maximizing technical deliverables early
 
-This ensures strong financial sustainability during the competition.
-
 ---
 
 # Conclusion
@@ -424,4 +576,4 @@ By combining:
 * automated claim processing
 * instant payouts
 
-we provide a scalable safety net tailored to the needs of India’s rapidly growing gig economy.
+we provide a scalable **financial safety net for India’s growing gig workforce**.
