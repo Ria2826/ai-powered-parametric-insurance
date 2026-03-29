@@ -1,0 +1,7 @@
+CREATE TABLE worker_locations (
+id UUID PRIMARY KEY,
+worker_id UUID NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
+latitude NUMERIC NOT NULL,
+longitude NUMERIC NOT NULL,
+recorded_at TIMESTAMP NOT NULL
+);
