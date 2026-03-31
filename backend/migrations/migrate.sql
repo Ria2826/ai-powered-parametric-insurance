@@ -1,0 +1,13 @@
+\i migrations/001_create_users.sql
+\i migrations/002_create_zones.sql
+\i migrations/003_create_workers.sql
+\i migrations/004_create_worker_locations.sql
+\i migrations/005_create_policies.sql
+\i migrations/006_create_risk_scores.sql
+\i migrations/007_create_disruptions.sql
+\i migrations/008_create_claims.sql
+\i migrations/009_create_fraud_logs.sql
+\i migrations/010_create_payments.sql
+\i migrations/011_create_manual_claim_requests.sql
+\i migrations/012_create_processed_events.sql
+\i migrations/013_create_indexes.sql
